@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>logs</title>
+		<meta name="keywords" content="">
+		<meta name="description" content="">
+		<!-- <link rel="shortcut icon" href="../favicon.ico"> -->
+		<link href="../../css/bootstrap.min-flatly.css" rel="stylesheet">
+		<link href="../../css/font-awesome.css?v=4.4.0" rel="stylesheet">
+		<link href="../../css/plugins/bootstrap-table/bootstrap-table.min.css" rel="stylesheet">
+		<link href="../../css/animate.css" rel="stylesheet">
+		<link href="../../css/style.css?v=4.1.0" rel="stylesheet">
+		<link href="../../css/plugins/pageMe/pageMe.css" rel="stylesheet" />
+		<link href="../../css/plugins/progressbar/mprogress.css" rel="stylesheet" />
+		<link href="../../css/plugins/progressbar/style.css" rel="stylesheet" />
+	</head>
+
+	<body class="gray-bg">
+		<div class="wrapper wrapper-content animated fadeInRight">
+
+			<div class="ibox float-e-margins">
+				<div class="ibox-title">
+					<h5>logs管理模块</h5>
+				</div>
+				<div class="ibox-content">
+					<div class="row row-lg">
+						<div class="clearfix hidden-xs"></div>
+						<div class="col-sm-12">
+							<!-- Example Checkbox Select -->
+							<div class="example-wrap">
+
+								<!-- 查询区域 -->
+								<div id="queryModel">
+									<input type="text" v-model="logId" placeholder="logId" style="margin-top: 10px" />&nbsp;
+									<input type="text" v-model="logs" placeholder="logs" style="margin-top: 10px" />&nbsp;
+									<input type="text" v-model="createTime" placeholder="createTime" style="margin-top: 10px" />&nbsp;
+									<button type="button" class="btn btn-primary btn-sm" @click="queryInfo()">查询</button>&nbsp;
+									<!-- 添加数据区域 -->
+									<button type="button" class="btn btn-primary btn-sm" onclick="addMsg()">添加数据</button>
+								</div>
+								<!-- 查询区域 end-->
+
+								<!-- 查询结果表格显示区域 -->
+								<div id="newsContent" class="table-responsive" style="overflow: scroll;" v-cloak>
+									<table class="table table-hover table-bordered text-nowrap">
+										<tr>
+											<th>logId</th>
+											<th>logs</th>
+											<th>createTime</th>
+											<th>操作</th>
+										</tr>
+										<tbody id="dataTable">
+											<tr v-for="data in result">
+												<td>{{data.logId}}</td>
+												<td>{{data.logs}}</td>
+												<td>{{data.createTime}}</td>
+												<td>
+													<button type="button" class="btn btn-danger btn-sm" @click="delMsg(data.logId,'/logs/delete')">删除</button>&nbsp;
+												</td>
+											</tr>
+										</tbody>
+									</table>
+									<div id="pageID" class="page_div"></div>
+								</div>
+								<!-- 查询结果表格显示区域 end-->
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- 修改模态框 -->
+		<div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+						<h4 class="modal-title" id="updateModalLabel">修改信息</h4>
+					</div>
+					<div class="modal-body" id="updateModalBody">
+						<form>
+							<div class="form-group">
+								<label for="logs-attr" class="control-label">logs:</label>
+								<input type="text" class="form-control" id="logs-attr" v-model="logs" />
+							</div>
+							<div class="form-group">
+								<label for="createTime-attr" class="control-label">createTime:</label>
+								<input type="text" class="form-control" id="createTime-attr" v-model="createTime" />
+							</div>
+							<div class="form-group">
+								<input type="hidden" class="form-control" id="logId-attr" v-model="logId" />
+							</div>
+						</form>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary" @click="confirmUp()">确认</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- 添加模态框 -->
+		<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+						<h4 class="modal-title" id="addModalLabel">添加信息</h4>
+					</div>
+					<div class="modal-body" id="addModalBody">
+						<form>
+							<div class="form-group">
+								<label for="logs-insert" class="control-label">logs:</label>
+								<input type="text" class="form-control" id="logs-insert" v-model="logs" />
+							</div>
+							<div class="form-group">
+								<label for="createTime-insert" class="control-label">createTime:</label>
+								<input type="text" class="form-control" id="createTime-insert" v-model="createTime" />
+							</div>
+						</form>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary" @click="confirmAdd()">确认</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="text-center">
+			<h3>
+				<a href="../login.html">login</a>
+			</h3>
+		</div>
+
+		<!-- 全局js -->
+		<script src="../../js/jquery.min.js?v=2.1.4"></script>
+		<script src="../../js/bootstrap.min.js?v=3.3.6"></script>
+
+		<!-- 自定义js -->
+		<script src="../../js/content.js?v=1.0.0"></script>
+
+		<!-- Bootstrap table -->
+		<script src="../../js/plugins/bootstrap-table/bootstrap-table.min.js"></script>
+		<script src="../../js/plugins/bootstrap-table/bootstrap-table-mobile.min.js"></script>
+		<script src="../../js/plugins/bootstrap-table/locale/bootstrap-table-zh-CN.min.js"></script>
+
+		<!-- Peity -->
+		<!-- <script src="../../js/demo/bootstrap-table-demo.js"></script> -->
+		<script src="../../js/vue/vue.min.js"></script>
+		<script src="../../js/util/ajaxFactory.js"></script>
+		<script src="../../js/util/crudVueFactory.js"></script>
+		<script src="../../js/util/pageMe.js"></script>
+		<script src="../../js/config/config.js"></script>
+		<script src="../../js/plugins/layer/layer.min.js"></script>
+		<script src="../../js/plugins/progressbar/init-mprogress.js"></script>
+		<script src="../../js/plugins/progressbar/mprogress.js"></script>
+
+		<script>
+			var currentPage = 1;
+			var totalPage;
+			var sqlMap = {};
+			//排序的数据
+			var orderData = [];
+			var controllerPrefix = "logs";
+			var methodName = "likeSelect";
+
+			var queryVue = new Vue({
+				el: '#queryModel',
+				data: {
+					logId: '',
+					logs: '',
+					createTime: ''
+				},
+				methods: {
+					queryInfo: function() {
+						sqlMap = {};
+						sqlMap.logId = this.logId;
+						sqlMap.logs = this.logs;
+						sqlMap.createTime = this.createTime;
+						currentPage = 1;
+						orderData = [];
+						$crud.getDataByCurrentPage();
+					},
+					exportExcel: function() {
+
+						//显示进度条
+						InitMprogress();
+
+						var param = '';
+
+						for (var key in sqlMap) {
+							if (sqlMap[key] != '') {
+								param += key + "=" + sqlMap[key] + "&";
+							}
+						}
+
+						window.location.href = basePath + "/" + controllerPrefix +
+							"/exportExcel?" + param;
+						// 进度条消失
+						setTimeout("MprogressEnd()", totalPage / 20 * 1000);
+					}
+				}
+			});
+
+			function makeResult(data) {
+				for (var i = 0; i < data.length; i++) {
+					if (data[i] == null) {
+						data[i] = {};
+						data[i]["logId"] = "无";
+						data[i]["logs"] = "无";
+						data[i]["createTime"] = "无";
+					}
+				}
+			}
+
+			var tableVue = new Vue({
+				el: '#newsContent',
+				data: {
+					result: []
+				},
+				//created:
+				mounted: function() {
+					$crud.getDataByCurrentPage();
+				},
+				methods: {
+
+					upMsg: function(logId, path) {
+
+						$z.ajaxStrAndJson({
+							url: basePath + path,
+							data: {
+								logId: logId
+							},
+							success: function(data) {
+								$z.dealCommonResult(data, function() {
+									data = data.result;
+									upVue.logId = data[0]["logId"];
+									upVue.logId = data[0]["logId"];
+									upVue.logs = data[0]["logs"];
+									upVue.createTime = data[0]["createTime"];
+									$('#updateModal').modal('show');
+								});
+							}
+						});
+					},
+					delMsg: function(logId, path) {
+						layer.confirm("<em style='color:black'>" + "只能删除今日信息"+"</em>", {
+							icon: 3,
+							offset: "200px",
+							title: '温馨提示'
+						}, function(index) {
+							//do something 
+							$z.ajaxStrAndJson({
+								url: basePath + path,
+								data: {
+									logId: logId
+								},
+								success: function(data) {
+									$z.dealCommonResult(data, function() {
+										$crud.getDataByCurrentPage();
+										layer.alert("<em style='color:black'>" + "删除成功！"+"</em>", {
+											icon: 6,
+											offset: "200px",
+											title: '提示'
+										});
+									});
+								}
+							});
+							layer.close(index);
+						});
+					}
+				}
+			});
+
+			var upVue = new Vue({
+				el: "#updateModal",
+				data: {
+					logId: '',
+					logId: '',
+					logs: '',
+					createTime: ''
+				},
+				methods: {
+					confirmUp: function() {
+						$z.ajaxStrAndJson({
+							url: basePath + "/" + controllerPrefix + "/update",
+							data: {
+								logId: this.logId,
+								logId: this.logId,
+								logs: this.logs,
+								createTime: this.createTime
+							},
+							success: function(data) {
+								$z.dealCommonResult(data, function() {
+									layer.alert("<em style='color:black'>" + "更新成功！" + "</em>", {
+										icon: 6,
+										offset: "200px",
+										title: '提示'
+									});
+									$('#updateModal').modal('hide');
+									$crud.getDataByCurrentPage();
+								});
+							}
+						});
+					}
+				}
+			});
+
+			function addMsg() {
+				$('#addModal').modal('show');
+			}
+
+			var addVue = new Vue({
+				el: "#addModal",
+				data: {
+					logId: '',
+					logs: '',
+					createTime: ''
+				},
+				methods: {
+					confirmAdd: function() {
+						$z.ajaxStrAndJson({
+							url: basePath + "/" + controllerPrefix + "/add",
+							data: {
+								logId: this.logId,
+								logs: this.logs,
+								createTime: this.createTime
+							},
+							success: function(data) {
+								$z.dealCommonResult(data, function() {
+									layer.alert("<em style='color:black'>" + "添加成功！" + "</em>", {
+										icon: 6,
+										offset: "200px",
+										title: '提示'
+									});
+									$('#addModal').modal('hide');
+									//初始化
+									sqlMap = {};
+									currentPage = totalPage;
+									orderData = [];
+									$crud.getDataByCurrentPage();
+								});
+							}
+						});
+					}
+				}
+			});
+		</script>
+	</body>
+</html>
